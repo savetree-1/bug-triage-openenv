@@ -1,0 +1,278 @@
+[
+  {
+    "bug_id": "BUG-001",
+    "title": "App crashes on iOS 17 when uploading files > 50MB",
+    "description": "The application consistently crashes when users try to upload files larger than 50MB on iOS 17 devices. Crash happens immediately on upload button tap. This is blocking 3 enterprise customers and affects ~847 active users.",
+    "logs": "2025-03-10 09:23:45 FATAL: EXC_BAD_ACCESS KERN_INVALID_ADDRESS at 0x0000000000000000\nStack trace:\n  0 CoreFoundation __exceptionPreprocess\n  1 CustomApp FileUploadManager.upload(url:size:)\n  2 CustomApp FilePickerViewController.uploadButtonTapped()\nMemory: 892MB / 1024MB before crash",
+    "environment": "iOS 17.2, iPhone 15 Pro, App v3.2.1",
+    "reporter": "enterprise_client_a",
+    "created_at": "2025-03-10T09:23:00Z",
+    "metadata": {"component": "file_upload", "affected_users": 847, "regression": true, "app_version": "3.2.1"},
+    "ground_truth": {"bug_type": "crash", "priority": "critical", "assigned_developer": "Alice", "suggested_action": "fix_immediately"}
+  },
+  {
+    "bug_id": "BUG-002",
+    "title": "Login button misaligned on Android tablets in landscape mode",
+    "description": "On Android tablets (10-inch+ screens) in landscape orientation, the login button overflows outside the card container. The button is partially hidden behind the keyboard. This is a visual issue only — login still works if user scrolls.",
+    "logs": "No crash. UI rendering issue observed in layout inspector: view bounds exceed parent container by 42px on right edge.",
+    "environment": "Android 13, Samsung Galaxy Tab S8, App v3.1.0",
+    "reporter": "qa_tester_02",
+    "created_at": "2025-03-11T14:05:00Z",
+    "metadata": {"component": "auth", "affected_users": 230, "regression": false, "app_version": "3.1.0"},
+    "ground_truth": {"bug_type": "ui", "priority": "low", "assigned_developer": "Carol", "suggested_action": "schedule_sprint"}
+  },
+  {
+    "bug_id": "BUG-003",
+    "title": "Dashboard takes 18+ seconds to load with > 1000 records",
+    "description": "When a user account has more than 1000 records, the main dashboard takes 18 to 25 seconds to load. CPU spikes to 100% during load. Users with < 500 records see normal 2-second load times. Performance degrades linearly with record count.",
+    "logs": "Profiler output:\n  db.query EXPLAIN shows full table scan (missing index on user_id)\n  Memory: 1.2GB allocated during load for 1000-record account\n  Query time: 16.4s (expected < 0.5s)",
+    "environment": "Chrome 122, Windows 11, Backend v2.9.0, PostgreSQL 15",
+    "reporter": "premium_user_456",
+    "created_at": "2025-03-12T08:30:00Z",
+    "metadata": {"component": "dashboard", "affected_users": 1250, "regression": true, "app_version": "2.9.0"},
+    "ground_truth": {"bug_type": "performance", "priority": "high", "assigned_developer": "Alice", "suggested_action": "fix_immediately"}
+  },
+  {
+    "bug_id": "BUG-004",
+    "title": "SQL injection possible in search endpoint",
+    "description": "The /api/v1/search endpoint does not sanitize user input. Passing ' OR 1=1 -- as the query parameter returns all records regardless of user permissions. This is a critical security vulnerability allowing unauthorized data access.",
+    "logs": "Request: GET /api/v1/search?q=' OR 1=1 --\nResponse: 200 OK, 50000 records returned (all records in DB)\nExpected: 403 or filtered results only for current user",
+    "environment": "Production API v3.0.2, PostgreSQL 15",
+    "reporter": "security_researcher_external",
+    "created_at": "2025-03-13T11:00:00Z",
+    "metadata": {"component": "search_api", "severity": "CVSS_9.8", "disclosure_deadline": "2025-03-27", "regression": false},
+    "ground_truth": {"bug_type": "security", "priority": "critical", "assigned_developer": "Bob", "suggested_action": "fix_immediately"}
+  },
+  {
+    "bug_id": "BUG-005",
+    "title": "Export to CSV corrupts data with special characters",
+    "description": "When exporting records containing special characters (é, ü, 中文, Arabic script) to CSV, the characters are replaced with question marks or garbled output. This causes data loss for international users. The web UI displays the data correctly but the export is broken.",
+    "logs": "Python traceback:\n  File 'export.py', line 142, in to_csv\n  UnicodeEncodeError: 'latin-1' codec can't encode character '\\u4e2d' in position 23",
+    "environment": "All platforms, Backend v3.2.0, Python 3.11",
+    "reporter": "enterprise_client_jp",
+    "created_at": "2025-03-14T06:45:00Z",
+    "metadata": {"component": "data_export", "affected_users": 3200, "regression": true, "app_version": "3.2.0"},
+    "ground_truth": {"bug_type": "data_loss", "priority": "high", "assigned_developer": "David", "suggested_action": "fix_immediately"}
+  },
+  {
+    "bug_id": "BUG-006",
+    "title": "App not working on Firefox 115 ESR",
+    "description": "The application fails to load on Firefox 115 ESR. The console shows errors about unsupported ES2022 syntax. Enterprise clients using Firefox ESR (which is common in regulated industries) cannot use the application at all.",
+    "logs": "Browser console:\n  SyntaxError: Unexpected token '??' (nullish coalescing)\n  at app.bundle.js:1:48291\n  Firefox 115 ESR does not support optional chaining or nullish coalescing",
+    "environment": "Firefox 115.0 ESR, Windows 10, App v3.2.1",
+    "reporter": "enterprise_client_finance",
+    "created_at": "2025-03-15T10:20:00Z",
+    "metadata": {"component": "frontend_build", "affected_users": 520, "regulated_industry": true},
+    "ground_truth": {"bug_type": "compatibility", "priority": "high", "assigned_developer": "Eve", "suggested_action": "fix_immediately"}
+  },
+  {
+    "bug_id": "BUG-007",
+    "title": "Dark mode toggle resets on page refresh",
+    "description": "The dark mode preference is not persisted when the user refreshes the page. The toggle correctly switches to dark mode but on any page reload it reverts to light mode. localStorage appears to be set correctly but not read on init.",
+    "logs": "Console: localStorage.getItem('theme') returns 'dark' correctly\nBut document class 'dark' not applied on DOMContentLoaded.\nSuspect: theme initialization runs before localStorage read.",
+    "environment": "Chrome 122, Safari 17, App v3.1.5",
+    "reporter": "user_feedback_portal",
+    "created_at": "2025-03-16T15:30:00Z",
+    "metadata": {"component": "ui_preferences", "affected_users": 890, "regression": true},
+    "ground_truth": {"bug_type": "ui", "priority": "medium", "assigned_developer": "Carol", "suggested_action": "schedule_sprint"}
+  },
+  {
+    "bug_id": "BUG-008",
+    "title": "Memory leak in WebSocket connection handler",
+    "description": "Long-running WebSocket connections (> 2 hours) cause server memory to grow unboundedly at approximately 50MB/hour per connection. With 200 concurrent users, servers OOM after ~6 hours. Requires restart every night.",
+    "logs": "Server metrics:\n  t=0h: 512MB heap\n  t=2h: 1.2GB heap\n  t=4h: 2.4GB heap\n  t=6h: OOMKilled\nheapdump shows: EventEmitter listeners not removed on disconnect\n  Retained: 180MB of dead connection objects",
+    "environment": "Node.js 20.11, Linux, Production v3.1.0",
+    "reporter": "devops_oncall",
+    "created_at": "2025-03-17T02:15:00Z",
+    "metadata": {"component": "websocket_server", "affected_users": 200, "incidents": 3, "regression": false},
+    "ground_truth": {"bug_type": "performance", "priority": "critical", "assigned_developer": "Alice", "suggested_action": "fix_immediately"}
+  },
+  {
+    "bug_id": "BUG-009",
+    "title": "Password reset email link expires too quickly",
+    "description": "Users report that the password reset link expires before they can use it. Investigation shows the link is valid for only 5 minutes. The spec requires 24 hours. This causes significant support tickets.",
+    "logs": "Config: PASSWORD_RESET_TTL=300 (should be 86400)\nNo crash. Functional bug in configuration.",
+    "environment": "All platforms, Backend v3.2.1",
+    "reporter": "customer_support_team",
+    "created_at": "2025-03-18T09:00:00Z",
+    "metadata": {"component": "auth", "support_tickets": 47, "regression": true},
+    "ground_truth": {"bug_type": "ui", "priority": "medium", "assigned_developer": "Carol", "suggested_action": "fix_immediately"}
+  },
+  {
+    "bug_id": "BUG-010",
+    "title": "Bulk delete operation silently deletes wrong records",
+    "description": "When using the bulk delete feature with a filter applied, the delete operation ignores the filter and deletes ALL records for the user instead of only the filtered subset. Multiple enterprise customers have lost production data.",
+    "logs": "SQL executed: DELETE FROM records WHERE user_id = ? (missing WHERE clause for filter)\nExpected: DELETE FROM records WHERE user_id = ? AND status = 'archived'\nAffected rows: 15,000 (expected: 230)",
+    "environment": "All platforms, Backend v3.2.0, PostgreSQL 15",
+    "reporter": "enterprise_client_b",
+    "created_at": "2025-03-19T14:00:00Z",
+    "metadata": {"component": "bulk_operations", "data_loss_confirmed": true, "affected_users": 5, "regression": true},
+    "ground_truth": {"bug_type": "data_loss", "priority": "critical", "assigned_developer": "David", "suggested_action": "fix_immediately"}
+  },
+  {
+    "bug_id": "BUG-011",
+    "title": "Tooltip appears behind modal dialog",
+    "description": "When hovering over elements inside a modal dialog, tooltips render behind the modal overlay instead of on top. This makes tooltip content unreadable. Affects all tooltips inside modals.",
+    "logs": "CSS z-index conflict:\n  .modal: z-index: 1000\n  .tooltip: z-index: 999\n  Fix: increase tooltip z-index to 1001",
+    "environment": "All browsers, App v3.0.0",
+    "reporter": "qa_tester_01",
+    "created_at": "2025-03-20T11:15:00Z",
+    "metadata": {"component": "ui_components", "affected_users": 0, "regression": false},
+    "ground_truth": {"bug_type": "ui", "priority": "low", "assigned_developer": "Carol", "suggested_action": "schedule_sprint"}
+  },
+  {
+    "bug_id": "BUG-012",
+    "title": "API key exposed in frontend JavaScript bundle",
+    "description": "A third-party analytics API key has been accidentally committed to the frontend JavaScript bundle. The key is visible in the source code and can be extracted by anyone who views the page source. The key has billing implications if misused.",
+    "logs": "Found in app.bundle.js line 4821:\n  const ANALYTICS_KEY = 'sk-live-xxxxxxxxxxxx';\nThis key has $500/month potential exposure if abused.",
+    "environment": "Production frontend, App v3.1.0",
+    "reporter": "security_internal_audit",
+    "created_at": "2025-03-21T16:30:00Z",
+    "metadata": {"component": "frontend_build", "secret_exposed": true, "billing_risk": true},
+    "ground_truth": {"bug_type": "security", "priority": "critical", "assigned_developer": "Bob", "suggested_action": "fix_immediately"}
+  },
+  {
+    "bug_id": "BUG-013",
+    "title": "Charts not rendering on Safari 16",
+    "description": "The analytics dashboard charts and graphs do not render at all on Safari 16. The chart container is blank. The charting library uses a Web API not supported in Safari 16.",
+    "logs": "Console: TypeError: ResizeObserver is not a constructor\n  at Chart.initialize (chart.min.js:1)\nSafari 16 does not support ResizeObserver in this configuration.",
+    "environment": "Safari 16.0, macOS Ventura, App v3.2.0",
+    "reporter": "user_6789",
+    "created_at": "2025-03-22T10:00:00Z",
+    "metadata": {"component": "analytics_dashboard", "affected_users": 1100, "regression": false},
+    "ground_truth": {"bug_type": "compatibility", "priority": "medium", "assigned_developer": "Eve", "suggested_action": "schedule_sprint"}
+  },
+  {
+    "bug_id": "BUG-014",
+    "title": "Background sync job uses 95% CPU for 10 minutes daily",
+    "description": "Every day at 2 AM UTC the background sync job causes CPU to spike to 95% for approximately 10 minutes, causing API latency to increase 8x during that window. The job processes incremental updates but is doing a full re-sync unnecessarily.",
+    "logs": "Cron job: sync_all_records (daily 02:00 UTC)\nDuration: 10m 23s (was 45s in v2.8)\nCPU peak: 95.2% on all cores\nQuery count: 450,000 (was 12,000 in v2.8 with delta sync)",
+    "environment": "Backend v3.0.0, 8-core production server",
+    "reporter": "devops_team",
+    "created_at": "2025-03-23T08:00:00Z",
+    "metadata": {"component": "background_jobs", "affected_users": 5000, "regression": true, "sla_breach": true},
+    "ground_truth": {"bug_type": "performance", "priority": "high", "assigned_developer": "Eve", "suggested_action": "fix_immediately"}
+  },
+  {
+    "bug_id": "BUG-015",
+    "title": "Something wrong with notifications I think",
+    "description": "Hi, notifications seem off. Sometimes I get them sometimes not. Not sure if it's my phone or the app. It's been like this for a while. Not urgent just thought you should know.",
+    "logs": null,
+    "environment": "Unknown",
+    "reporter": "casual_user_1234",
+    "created_at": "2025-03-24T17:45:00Z",
+    "metadata": {"component": "notifications", "vague_report": true},
+    "ground_truth": {"bug_type": "ui", "priority": "low", "assigned_developer": "Carol", "suggested_action": "needs_more_info"}
+  },
+  {
+    "bug_id": "BUG-016",
+    "title": "Payment gateway returns 500 during checkout — users charged but order not created",
+    "description": "During high-traffic periods, the payment gateway intermittently returns HTTP 500 after successfully charging the user's credit card. The application treats this as a failure and does not create the order, but the user has already been charged. There is no retry or idempotency mechanism. 23 users have been double-charged this week.",
+    "logs": "2025-03-25 14:02:11 ERROR: PaymentGateway.charge() succeeded (txn_id=ch_3xyz...)\n2025-03-25 14:02:11 ERROR: OrderService.create() failed: HTTPError 500 from gateway callback\n2025-03-25 14:02:11 ERROR: Payment recorded but order not created — ORPHAN PAYMENT\nAffected transactions: 23 in last 7 days",
+    "environment": "Production Backend v3.2.1, Stripe API v2024-01-01",
+    "reporter": "finance_team",
+    "created_at": "2025-03-25T14:05:00Z",
+    "metadata": {"component": "payments", "financial_impact": true, "affected_users": 23, "revenue_at_risk": 4600},
+    "ground_truth": {"bug_type": "data_loss", "priority": "critical", "assigned_developer": "David", "suggested_action": "fix_immediately"}
+  },
+  {
+    "bug_id": "BUG-017",
+    "title": "App works in debug build but crashes in release build",
+    "description": "The Android release build crashes immediately on startup with a ProGuard obfuscation error. The debug build works perfectly. This blocks the upcoming release scheduled for Friday. The crash is in a third-party SDK that was not excluded from ProGuard rules.",
+    "logs": "FATAL: java.lang.ClassNotFoundException: c.a.b.AnalyticsManager\n  at dalvik.system.BaseDexClassLoader.findClass()\n  Note: Class was obfuscated by ProGuard from 'com.analytics.sdk.AnalyticsManager'\nRelease build ProGuard config missing: -keep class com.analytics.sdk.** { *; }",
+    "environment": "Android 14, Release build, ProGuard enabled, App v3.3.0-rc1",
+    "reporter": "mobile_dev_lead",
+    "created_at": "2025-03-25T09:00:00Z",
+    "metadata": {"component": "android_build", "blocks_release": true, "regression": false},
+    "ground_truth": {"bug_type": "compatibility", "priority": "critical", "assigned_developer": "Eve", "suggested_action": "fix_immediately"}
+  },
+  {
+    "bug_id": "BUG-018",
+    "title": "Session token not invalidated after password change",
+    "description": "When a user changes their password, existing session tokens remain valid. This means that if someone's password was compromised and they change it, the attacker can still access the account using the old session token. No session invalidation occurs on password change.",
+    "logs": "Test case:\n  1. Login → get session token A\n  2. Change password via settings\n  3. Use token A to make API call → 200 OK (SHOULD BE 401)\n  4. Token A remains valid for its full TTL (24h)",
+    "environment": "Production API v3.2.1, Redis session store",
+    "reporter": "penetration_test_team",
+    "created_at": "2025-03-25T11:30:00Z",
+    "metadata": {"component": "session_management", "security_audit": true, "OWASP_category": "A07:2021"},
+    "ground_truth": {"bug_type": "security", "priority": "high", "assigned_developer": "Bob", "suggested_action": "fix_immediately"}
+  },
+  {
+    "bug_id": "BUG-019",
+    "title": "Identical bug report — notifications intermittent on Android",
+    "description": "Push notifications on Android are not received consistently. Some users get them, some don't. We've had 3 reports about this in the last month. This might be related to BUG-015 or it might be a different issue. Android-specific FCM token refresh might be failing silently.",
+    "logs": "FCM diagnostic:\n  Token refresh callback: no errors logged\n  Server-side delivery receipts: 95% delivered\n  Client-side reception rate: ~60% (sampled from 50 users)\n  Suspect: Doze mode or battery optimization killing background service",
+    "environment": "Android 12-14, Various devices, App v3.2.0",
+    "reporter": "qa_tester_03",
+    "created_at": "2025-03-25T13:00:00Z",
+    "metadata": {"component": "push_notifications", "possibly_duplicate": "BUG-015", "platform_specific": "android"},
+    "ground_truth": {"bug_type": "compatibility", "priority": "medium", "assigned_developer": "Eve", "suggested_action": "duplicate"}
+  },
+  {
+    "bug_id": "BUG-020",
+    "title": "User avatar upload succeeds but image never displays",
+    "description": "Users successfully upload profile avatars (they get a success toast and can see a preview during upload), but the avatar never appears on their profile or in the application. The upload endpoint returns 200 and the file is saved to S3, but the CDN URL generation has a trailing slash that causes a 404.",
+    "logs": "Upload: POST /api/v1/users/avatar → 200 OK\nS3 key: users/12345/avatar.jpg (exists, verified)\nCDN URL generated: https://cdn.example.com/users/12345/avatar.jpg/ ← TRAILING SLASH\nActual CDN path: https://cdn.example.com/users/12345/avatar.jpg ← works\nCDN returns 404 for URLs with trailing slash",
+    "environment": "All platforms, Backend v3.2.1, CloudFront CDN",
+    "reporter": "user_8901",
+    "created_at": "2025-03-25T15:20:00Z",
+    "metadata": {"component": "user_profile", "affected_users": 340, "regression": true},
+    "ground_truth": {"bug_type": "ui", "priority": "medium", "assigned_developer": "Carol", "suggested_action": "fix_immediately"}
+  },
+  {
+    "bug_id": "BUG-021",
+    "title": "URGENT: All user data wiped after database migration script ran twice",
+    "description": "A migration script was accidentally run twice in production. The second run of the DROP TABLE + CREATE TABLE migration deleted all user records. Backups exist from 6 hours ago but 6 hours of data is lost. 12,000 users affected. The migration script lacks idempotency guards.",
+    "logs": "Migration log:\n  2025-03-25 10:00:01 Running migration 045_recreate_users_table\n  2025-03-25 10:00:01 DROP TABLE users CASCADE\n  2025-03-25 10:00:02 CREATE TABLE users (...)\n  2025-03-25 10:00:02 Migration complete (0 rows)\n  NOTE: This was the SECOND execution. First run was at 09:30.\nBackup available from 04:00 UTC (6h data gap).",
+    "environment": "Production PostgreSQL 15, Migration framework: Alembic",
+    "reporter": "dba_oncall",
+    "created_at": "2025-03-25T10:05:00Z",
+    "metadata": {"component": "database", "data_loss_confirmed": true, "affected_users": 12000, "severity": "incident"},
+    "ground_truth": {"bug_type": "data_loss", "priority": "critical", "assigned_developer": "David", "suggested_action": "fix_immediately"}
+  },
+  {
+    "bug_id": "BUG-022",
+    "title": "Rate limiter misconfigured — legitimate users blocked",
+    "description": "The API rate limiter was recently updated to 10 requests/minute per IP, but many enterprise clients share a single corporate IP (NAT). This causes legitimate users behind corporate networks to be blocked with 429 errors after just 10 requests across ALL users on that IP. Previous limit was 1000 req/min per API key.",
+    "logs": "Rate limiter config diff:\n  BEFORE: rate_limit_by=api_key, limit=1000/min\n  AFTER: rate_limit_by=ip_address, limit=10/min\n  429 errors increased 500% since deployment\n  80% of 429s come from 5 enterprise NAT IPs",
+    "environment": "Production API v3.2.1, nginx rate limiting",
+    "reporter": "enterprise_support",
+    "created_at": "2025-03-25T12:00:00Z",
+    "metadata": {"component": "api_gateway", "affected_users": 2000, "regression": true, "enterprise_impact": true},
+    "ground_truth": {"bug_type": "compatibility", "priority": "high", "assigned_developer": "Eve", "suggested_action": "fix_immediately"}
+  },
+  {
+    "bug_id": "BUG-023",
+    "title": "PDF export hangs indefinitely for reports with embedded images",
+    "description": "When generating a PDF export of reports that contain embedded images, the export process hangs indefinitely. The server thread is blocked and never returns. No timeout is configured. After 20+ hung requests, the worker pool is exhausted and the entire API becomes unresponsive.",
+    "logs": "Thread dump:\n  Thread-12 [BLOCKED] at com.pdf.ImageRenderer.loadExternalResource()\n  Waiting for HTTP connection to expired CDN URL\n  No socket timeout configured (default: infinite)\n  Worker pool: 20/20 threads blocked after 4 hours\n  API response time: >30s for ALL endpoints",
+    "environment": "Production Backend v3.1.0, Java 17, Tomcat",
+    "reporter": "monitoring_alerts",
+    "created_at": "2025-03-25T16:00:00Z",
+    "metadata": {"component": "pdf_export", "caused_outage": true, "resolution": "restart_required"},
+    "ground_truth": {"bug_type": "performance", "priority": "critical", "assigned_developer": "Alice", "suggested_action": "fix_immediately"}
+  },
+  {
+    "bug_id": "BUG-024",
+    "title": "Form data lost when session expires mid-edit",
+    "description": "Users who spend more than 30 minutes editing a long form lose all their work when they click Submit and the session has expired. The form does not auto-save, and the session expiry redirect does not preserve form state. Users are redirected to login, and after logging in, the form is empty.",
+    "logs": "User journey:\n  1. Open form at 10:00\n  2. Fill in 15 fields over 35 minutes\n  3. Click Submit at 10:35\n  4. Session expired at 10:30 → 302 redirect to /login\n  5. Login succeeds → redirect to /dashboard (NOT back to form)\n  6. Form data: LOST",
+    "environment": "All browsers, App v3.2.0",
+    "reporter": "customer_support_team",
+    "created_at": "2025-03-25T17:00:00Z",
+    "metadata": {"component": "forms", "affected_users": 890, "support_tickets": 34, "regression": false},
+    "ground_truth": {"bug_type": "data_loss", "priority": "high", "assigned_developer": "David", "suggested_action": "schedule_sprint"}
+  },
+  {
+    "bug_id": "BUG-025",
+    "title": "CORS headers missing for new mobile app domain",
+    "description": "After deploying the new mobile companion web app on a separate subdomain (m.example.com), all API calls fail with CORS errors. The main app (app.example.com) works fine. The CORS allowed origins list was not updated to include the mobile subdomain. This completely blocks the mobile web app launch.",
+    "logs": "Browser console (m.example.com):\n  Access to fetch at 'https://api.example.com/v1/data' from origin 'https://m.example.com' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present.\nServer CORS config: allowed_origins=['https://app.example.com', 'http://localhost:3000']",
+    "environment": "All mobile browsers, API v3.2.1, Mobile web app v1.0.0",
+    "reporter": "mobile_team_lead",
+    "created_at": "2025-03-25T18:00:00Z",
+    "metadata": {"component": "api_gateway", "blocks_launch": true, "platform_specific": "mobile_web"},
+    "ground_truth": {"bug_type": "compatibility", "priority": "high", "assigned_developer": "Eve", "suggested_action": "fix_immediately"}
+  }
+]
+

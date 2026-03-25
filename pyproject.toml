@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bug-triage-env"
+version = "0.1.0"
+description = "Production Bug Triage OpenEnv Environment"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.110.0",
+    "uvicorn[standard]>=0.29.0",
+    "pydantic>=2.0.0",
+    "requests>=2.31.0",
+    "aiohttp>=3.9.0",
+    "openai>=1.0.0",
+    "google-genai>=1.0.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["bug_triage_env*"]

@@ -1,0 +1,40 @@
+# Environment variables
+.env
+.env.*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environment
+.venv/
+venv/
+ENV/
+env/
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+.eggs/
+
+# IDEs / Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Testing / Profiling
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Hugging Face Spaces specific (if any local temp files)
+.gradio
+.hf_cache
+
+# Logs
+*.log
