@@ -21,7 +21,7 @@ tags:
 [![OpenEnv](https://img.shields.io/badge/OpenEnv-compliant-brightgreen.svg)](https://github.com/OpenEnv-AI/openenv)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-[Getting Started](#-getting-started) · [Tasks](#-tasks) · [API Reference](#-api-reference) · [Baseline](#-baseline-agent) · [Architecture](#-architecture) · [Deployment](#-deployment)
+[Getting Started](#getting-started) | [Tasks](#tasks) | [API Reference](#api-reference) | [Baseline](#baseline-agent) | [Architecture](#architecture) | [Deployment](#deployment)
 
 </div>
 
@@ -29,20 +29,20 @@ tags:
 
 ## Overview
 
-**Bug Triage OpenEnv** simulates a real-world issue tracking system (like [Jira](https://www.atlassian.com/software/jira), [GitHub Issues](https://github.com/features/issues), or [Linear](https://linear.app)) where an AI agent must read incoming bug reports and make triage decisions:
+**Bug Triage OpenEnv** simulates a real-world issue tracking system (like Jira, GitHub Issues, or Linear) where an AI agent must read incoming bug reports and make triage decisions:
 
 1. **Classify** the bug type (crash, UI, security, etc.)
-2. **Prioritize** the severity (low → critical)
+2. **Prioritize** the severity (low to critical)
 3. **Route** to the right developer based on expertise
 4. **Recommend** the appropriate action (fix immediately, schedule, etc.)
 
-This environment is built for the [Meta × PyTorch Hackathon](https://pytorch.org/) using the [OpenEnv](https://github.com/OpenEnv-AI/openenv) framework, and is designed for training RL agents via [GRPO](https://arxiv.org/abs/2402.03300) (Group Relative Policy Optimization).
+This environment is built for the Meta x PyTorch Hackathon using the OpenEnv framework, and is designed for training RL agents via GRPO (Group Relative Policy Optimization).
 
 ### Why Bug Triage?
 
 | Real-World Impact | RL Suitability |
 |---|---|
-| Every software company triages 100s–1000s of bugs daily | Clear reward signal (correct vs incorrect triage) |
+| Every software company triages 100s-1000s of bugs daily | Clear reward signal (correct vs incorrect triage) |
 | Manual triage costs engineering hours | Partial credit for near-miss decisions |
 | Misrouted bugs cause delays and outages | Increasing difficulty across 3 tasks |
 | Ambiguous reports require reasoning | Rich text observations for LLM agents |
@@ -54,18 +54,18 @@ This environment is built for the [Meta × PyTorch Hackathon](https://pytorch.or
 ### Prerequisites
 
 - Python 3.10+
-- [pip](https://pip.pypa.io/en/stable/) or [uv](https://github.com/astral-sh/uv)
+- pip or uv
 
 ### Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/<your-username>/bug-triage-env.git
-cd bug-triage-env
+git clone https://github.com/savetree-1/bug-triage-openenv.git
+cd bug-triage-openenv
 
 # Create virtual environment
 python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+source .venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
@@ -79,11 +79,11 @@ pip install -r requirements.txt
 uvicorn bug_triage_env.server.app:app --host 0.0.0.0 --port 8000
 ```
 
-**2. Verify it's running:**
+**2. Verify it is running:**
 
 ```bash
 curl http://localhost:8000/health
-# → {"status": "healthy"}
+# Returns: {"status": "healthy"}
 ```
 
 **3. Run a full episode:**
@@ -116,14 +116,14 @@ with BugTriageEnvClient("http://localhost:8000") as env:
         suggested_action="fix_immediately",
     )
     result = env.step(obs["episode_id"], action)
-    print(f"Score: {result['grader_score']}")  # 0.0 – 1.0
+    print(f"Score: {result['grader_score']}")  # 0.0 - 1.0
 ```
 
 ---
 
 ## Tasks
 
-Three tasks of increasing difficulty, each with an automated grader returning scores in `[0.0, 1.0]`:
+Three tasks of increasing difficulty, each with an automated grader returning scores in [0.0, 1.0]:
 
 ### Task 1: Bug Type Classification (Easy)
 
@@ -131,9 +131,9 @@ Three tasks of increasing difficulty, each with an automated grader returning sc
 |---|---|
 | **Goal** | Classify the bug into one of 6 categories |
 | **Input** | Bug title, description, logs, environment |
-| **Output** | `bug_type`: `crash` · `ui` · `performance` · `security` · `data_loss` · `compatibility` |
-| **Scoring** | Exact match: `1.0`, Wrong: `0.0` |
-| **Grader** | [`task1_grader.py`](bug_triage_env/graders/task1_grader.py) |
+| **Output** | `bug_type`: `crash`, `ui`, `performance`, `security`, `data_loss`, `compatibility` |
+| **Scoring** | Exact match: 1.0, Wrong: 0.0 |
+| **Grader** | `task1_grader.py` |
 
 ### Task 2: Priority Assignment (Medium)
 
@@ -141,9 +141,9 @@ Three tasks of increasing difficulty, each with an automated grader returning sc
 |---|---|
 | **Goal** | Assign the correct severity level |
 | **Input** | Bug title, description, logs, environment |
-| **Output** | `priority`: `low` · `medium` · `high` · `critical` |
-| **Scoring** | Exact: `1.0`, 1-level off: `0.67`, 2-levels: `0.33`, 3-levels: `0.0` |
-| **Grader** | [`task2_grader.py`](bug_triage_env/graders/task2_grader.py) |
+| **Output** | `priority`: `low`, `medium`, `high`, `critical` |
+| **Scoring** | Exact: 1.0, 1-level off: 0.67, 2-levels: 0.33, 3-levels: 0.0 |
+| **Grader** | `task2_grader.py` |
 
 ### Task 3: Full Bug Triage (Hard)
 
@@ -151,39 +151,37 @@ Three tasks of increasing difficulty, each with an automated grader returning sc
 |---|---|
 | **Goal** | Complete triage: classify + prioritize + route + recommend action |
 | **Output** | `bug_type` + `priority` + `assigned_developer` + `suggested_action` |
-| **Developers** | `Alice` (crash/perf) · `Bob` (crash/security) · `Carol` (UI/compat) · `David` (security/data) · `Eve` (UI/perf/compat) |
-| **Actions** | `fix_immediately` · `schedule_sprint` · `needs_more_info` · `wontfix` · `duplicate` |
-| **Scoring** | Weighted composite — see [Reward Design](docs/REWARD_DESIGN.md) |
-| **Grader** | [`task3_grader.py`](bug_triage_env/graders/task3_grader.py) |
-
-> **Scoring Formula (Task 3):** `0.3 × type + 0.3 × priority + 0.2 × developer + 0.2 × action`
+| **Developers** | Alice (crash/perf), Bob (crash/security), Carol (UI/compat), David (security/data), Eve (UI/perf/compat) |
+| **Actions** | `fix_immediately`, `schedule_sprint`, `needs_more_info`, `wontfix`, `duplicate` |
+| **Scoring** | Weighted composite: 0.3 x type + 0.3 x priority + 0.2 x developer + 0.2 x action |
+| **Grader** | `task3_grader.py` |
 
 ---
 
 ## API Reference
 
-All endpoints follow the [OpenEnv specification](https://github.com/OpenEnv-AI/openenv).
+All endpoints follow the OpenEnv specification.
 
 ### Standard OpenEnv Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `GET` | [`/health`](#get-health) | Liveness check |
-| `POST` | [`/reset`](#post-reset) | Start a new episode |
-| `POST` | [`/step`](#post-step) | Submit triage action |
-| `GET` | [`/state`](#get-state) | Current episode metadata |
+| `GET` | `/health` | Liveness check |
+| `POST` | `/reset` | Start a new episode |
+| `POST` | `/step` | Submit triage action |
+| `GET` | `/state` | Current episode metadata |
 
 ### Hackathon-Required Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `GET` | [`/tasks`](#get-tasks) | List all tasks + action schemas |
-| `POST` | [`/grader`](#post-grader) | Grade a completed episode |
-| `POST` | [`/baseline`](#post-baseline) | Run baseline inference |
+| `GET` | `/tasks` | List all tasks and action schemas |
+| `POST` | `/grader` | Grade a completed episode |
+| `POST` | `/baseline` | Run baseline inference |
 
 ---
 
-### `GET /health`
+### GET /health
 
 ```bash
 curl http://localhost:8000/health
@@ -193,7 +191,7 @@ curl http://localhost:8000/health
 {"status": "healthy"}
 ```
 
-### `POST /reset`
+### POST /reset
 
 Start a new episode. Returns an observation with a random bug report.
 
@@ -203,8 +201,7 @@ curl -X POST http://localhost:8000/reset \
   -d '{"task_id": "task_1"}'
 ```
 
-<details>
-<summary>Response Schema</summary>
+Response:
 
 ```json
 {
@@ -228,9 +225,7 @@ curl -X POST http://localhost:8000/reset \
 }
 ```
 
-</details>
-
-### `POST /step`
+### POST /step
 
 Submit a triage action. The episode ends immediately (single-step).
 
@@ -249,8 +244,7 @@ curl -X POST http://localhost:8000/step \
   }'
 ```
 
-<details>
-<summary>Response Schema</summary>
+Response:
 
 ```json
 {
@@ -258,15 +252,13 @@ curl -X POST http://localhost:8000/step \
   "reward": 1.0,
   "grader_score": 1.0,
   "task_id": "task_3",
-  "feedback": "Grader score: 1.00 | Bug type: ✓ | Priority: ✓ | Developer: ✓ | Action: ✓",
+  "feedback": "Grader score: 1.00 | Bug type: correct | Priority: correct | Developer: correct | Action: correct",
   "step_number": 1,
   "episode_id": "abc123"
 }
 ```
 
-</details>
-
-### `GET /tasks`
+### GET /tasks
 
 ```bash
 curl http://localhost:8000/tasks
@@ -274,7 +266,7 @@ curl http://localhost:8000/tasks
 
 Returns all 3 tasks with their action schemas.
 
-### `POST /grader`
+### POST /grader
 
 ```bash
 curl -X POST http://localhost:8000/grader \
@@ -303,9 +295,9 @@ The baseline supports two LLM providers with automatic fallback:
 
 | Priority | Provider | Env Variable | Model |
 |----------|----------|-------------|-------|
-| 1 (primary) | [OpenAI](https://platform.openai.com/) | `OPENAI_API_KEY` | `gpt-4o-mini` |
-| 2 (fallback) | [Google Gemini](https://ai.google.dev/gemini-api/docs) | `GEMINI_API_KEY` | `gemini-2.5-flash` |
-| 3 (last resort) | Random | — | — |
+| 1 (primary) | OpenAI | `OPENAI_API_KEY` | gpt-4o-mini |
+| 2 (fallback) | Google Gemini | `GEMINI_API_KEY` | gemini-2.5-flash |
+| 3 (last resort) | Random | -- | -- |
 
 ### Running the Baseline
 
@@ -329,70 +321,70 @@ python -m bug_triage_env.baseline --all-tasks --json
 
 | Task | Mean Score | Range | Description |
 |------|-----------|-------|-------------|
-| Task 1 | **0.80** | 0.00–1.00 | Bug type classification |
-| Task 2 | **0.93** | 0.67–1.00 | Priority assignment |
-| Task 3 | **0.78** | 0.60–1.00 | Full triage |
-| **Overall** | **0.84** | | Weighted average |
+| Task 1 | 0.80 | 0.00-1.00 | Bug type classification |
+| Task 2 | 0.93 | 0.67-1.00 | Priority assignment |
+| Task 3 | 0.78 | 0.60-1.00 | Full triage |
+| Overall | 0.84 | | Weighted average |
 
-> Without any API key, the baseline falls back to random actions (scores ~0.15).  
-> Both providers include retry logic with exponential backoff for rate-limited API calls.
+Without any API key, the baseline falls back to random actions (scores around 0.15).
+Both providers include retry logic with exponential backoff for rate-limited API calls.
 
 ---
 
 ## Architecture
 
 ```
-┌──────────────────────────────────────────┐
-│              FastAPI Server              │
-│  ┌────────┐  ┌────────┐  ┌───────────┐  │
-│  │ /reset │  │ /step  │  │ /grader   │  │
-│  └───┬────┘  └───┬────┘  └─────┬─────┘  │
-│      │           │              │        │
-│  ┌───▼───────────▼──────────────▼─────┐  │
-│  │      BugTriageEnvironment          │  │
-│  │  ┌──────────┐  ┌───────────────┐   │  │
-│  │  │ Dataset  │  │ Episode Store │   │  │
-│  │  │ 25 Bugs  │  │ (thread-safe) │   │  │
-│  │  └──────────┘  └───────────────┘   │  │
-│  └────────────────────┬───────────────┘  │
-│                       │                  │
-│  ┌────────────────────▼───────────────┐  │
-│  │         Graders Registry           │  │
-│  │  task1: exact match                │  │
-│  │  task2: distance-based             │  │
-│  │  task3: weighted composite         │  │
-│  └────────────────────────────────────┘  │
-└──────────────────────────────────────────┘
-         ▲                      ▲
-         │ HTTP                 │ HTTP
-    ┌────┴─────┐          ┌────┴──────────┐
-    │  Client  │          │   Baseline    │
-    │ (Python) │          │ OpenAI/Gemini │
-    └──────────┘          └───────────────┘
++------------------------------------------+
+|              FastAPI Server              |
+|  +--------+  +--------+  +-----------+  |
+|  | /reset |  | /step  |  | /grader   |  |
+|  +---+----+  +---+----+  +-----+-----+  |
+|      |           |              |        |
+|  +---v-----------v--------------v-----+  |
+|  |      BugTriageEnvironment          |  |
+|  |  +----------+  +---------------+   |  |
+|  |  | Dataset  |  | Episode Store |   |  |
+|  |  | 25 Bugs  |  | (thread-safe) |   |  |
+|  |  +----------+  +---------------+   |  |
+|  +--------------------+---------------+  |
+|                       |                  |
+|  +--------------------v---------------+  |
+|  |         Graders Registry           |  |
+|  |  task1: exact match                |  |
+|  |  task2: distance-based             |  |
+|  |  task3: weighted composite         |  |
+|  +------------------------------------+  |
++------------------------------------------+
+         ^                      ^
+         | HTTP                 | HTTP
+    +----+-----+          +----+----------+
+    |  Client  |          |   Baseline    |
+    | (Python) |          | OpenAI/Gemini |
+    +----------+          +---------------+
 ```
 
 ### Observation Space
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `bug_report.title` | `str` | Short bug summary |
-| `bug_report.description` | `str` | Detailed description |
-| `bug_report.logs` | `str?` | Error logs / stack traces |
-| `bug_report.environment` | `str?` | OS, browser, hardware |
-| `bug_report.metadata` | `dict` | Extra context |
-| `available_developers` | `list[str]` | 5 developer names |
-| `done` | `bool` | Episode terminal state |
-| `reward` | `float` | Training signal `[-0.5, 1.0]` |
-| `grader_score` | `float?` | Evaluation score `[0.0, 1.0]` |
+| `bug_report.title` | str | Short bug summary |
+| `bug_report.description` | str | Detailed description |
+| `bug_report.logs` | str (optional) | Error logs / stack traces |
+| `bug_report.environment` | str (optional) | OS, browser, hardware |
+| `bug_report.metadata` | dict | Extra context |
+| `available_developers` | list of str | 5 developer names |
+| `done` | bool | Episode terminal state |
+| `reward` | float | Training signal [-0.5, 1.0] |
+| `grader_score` | float (optional) | Evaluation score [0.0, 1.0] |
 
 ### Action Space
 
 | Field | Task 1 | Task 2 | Task 3 |
 |-------|--------|--------|--------|
-| `bug_type` |  Required | — |  Required |
-| `priority` | — |  Required |  Required |
-| `assigned_developer` | — | — |  Required |
-| `suggested_action` | — | — |  Required |
+| `bug_type` | Required | -- | Required |
+| `priority` | -- | Required | Required |
+| `assigned_developer` | -- | -- | Required |
+| `suggested_action` | -- | -- | Required |
 | `confidence` | Optional | Optional | Optional |
 | `reasoning` | Optional | Optional | Optional |
 
@@ -400,26 +392,25 @@ python -m bug_triage_env.baseline --all-tasks --json
 
 | Signal | Range | Purpose |
 |--------|-------|---------|
-| **Grader Score** | `[0.0, 1.0]` | Evaluation metric |
-| **Shaped Reward** | `[-0.5, 1.0]` | Training signal for GRPO |
-| **Calibration Bonus** | `[-0.15, +0.1]` | Confidence calibration reward |
+| Grader Score | [0.0, 1.0] | Evaluation metric |
+| Shaped Reward | [-0.5, 1.0] | Training signal for GRPO |
+| Calibration Bonus | [-0.15, +0.1] | Confidence calibration reward |
 
-> Formula: `reward = (grader_score × 1.5) - 0.5 + calibration_bonus`  
-> This maps: score 0.0 → reward -0.5, score 0.33 → reward 0.0, score 1.0 → reward 1.0  
-> See [docs/REWARD_DESIGN.md](docs/REWARD_DESIGN.md) for full details.
+Formula: reward = (grader_score x 1.5) - 0.5 + calibration_bonus
+This maps: score 0.0 to reward -0.5, score 0.33 to reward 0.0, score 1.0 to reward 1.0
 
 ### Confidence Calibration (Novel Mechanic)
 
-Agents can optionally provide a `confidence` score (0.0–1.0) alongside their triage decision. The environment rewards **well-calibrated** agents and penalizes **overconfident wrong** answers:
+Agents can optionally provide a `confidence` score (0.0-1.0) alongside their triage decision. The environment rewards well-calibrated agents and penalizes overconfident wrong answers:
 
 | Outcome | Confidence | Calibration Bonus | Why |
 |---------|-----------|-------------------|-----|
-| Correct + Confident | score≥0.8, conf≥0.8 | **+0.10** | Knows what it knows |
-| Wrong + Overconfident | score<0.5, conf≥0.8 | **-0.15** | Dangerously wrong |
-| Well-Calibrated | \|conf-score\|<0.2 | **+0.05** | Honest uncertainty |
-| Poorly Calibrated | \|conf-score\|≥0.2 | **-0.05** | Miscalibrated |
+| Correct + Confident | score>=0.8, conf>=0.8 | +0.10 | Knows what it knows |
+| Wrong + Overconfident | score<0.5, conf>=0.8 | -0.15 | Dangerously wrong |
+| Well-Calibrated | abs(conf-score)<0.2 | +0.05 | Honest uncertainty |
+| Poorly Calibrated | abs(conf-score)>=0.2 | -0.05 | Miscalibrated |
 
-This creates a genuine RL challenge: the agent must learn not just **what's correct**, but **when it's certain** — a critical skill for real-world deployment where overconfident wrong triage causes outages.
+This creates a genuine RL challenge: the agent must learn not just what is correct, but when it is certain -- a critical skill for real-world deployment where overconfident wrong triage causes outages.
 
 ---
 
@@ -441,10 +432,7 @@ curl http://localhost:8000/health
 ### Hugging Face Spaces
 
 ```bash
-# Install OpenEnv CLI
 pip install openenv
-
-# Deploy
 openenv push --repo-id <your-username>/bug-triage-env
 ```
 
@@ -454,33 +442,28 @@ openenv push --repo-id <your-username>/bug-triage-env
 
 ```
 .
-├── README.md                   ← You are here
-├── Dockerfile                  ← Production container
-├── openenv.yaml                ← OpenEnv manifest
-├── pyproject.toml              ← Python package config
-├── requirements.txt            ← Pinned dependencies
-├── .dockerignore
-│
-├── bug_triage_env/             ← Main package
-│   ├── __init__.py
-│   ├── models.py               ← Typed Pydantic models
-│   ├── client.py               ← Sync + Async HTTP clients
-│   ├── baseline.py             ← OpenAI/Gemini inference
-│   ├── data/
-│   │   └── bugs.json           ← 25 real-world bug reports
-│   ├── graders/
-│   │   ├── task1_grader.py     ← Bug classification (exact match)
-│   │   ├── task2_grader.py     ← Priority (distance-based)
-│   │   └── task3_grader.py     ← Full triage (weighted composite)
-│   └── server/
-│       ├── environment.py      ← Core RL environment
-│       └── app.py              ← FastAPI server
-│
-└── docs/
-    ├── ARCHITECTURE.md
-    ├── TASKS.md
-    ├── REWARD_DESIGN.md
-    └── IMPLEMENTATION_PLAN.md
+|-- README.md                    This file
+|-- Dockerfile                   Production container
+|-- openenv.yaml                 OpenEnv manifest
+|-- inference.py                 Hackathon inference script
+|-- pyproject.toml               Python package config
+|-- requirements.txt             Pinned dependencies
+|-- .dockerignore
+|
+|-- bug_triage_env/              Main package
+|   |-- __init__.py
+|   |-- models.py                Typed Pydantic models
+|   |-- client.py                Sync + Async HTTP clients
+|   |-- baseline.py              OpenAI/Gemini inference
+|   |-- data/
+|   |   |-- bugs.json            25 real-world bug reports
+|   |-- graders/
+|   |   |-- task1_grader.py      Bug classification (exact match)
+|   |   |-- task2_grader.py      Priority (distance-based)
+|   |   |-- task3_grader.py      Full triage (weighted composite)
+|   |-- server/
+|       |-- environment.py       Core RL environment
+|       |-- app.py               FastAPI server
 ```
 
 ---
@@ -492,12 +475,10 @@ openenv push --repo-id <your-username>/bug-triage-env
 uvicorn bug_triage_env.server.app:app --port 8000 &
 
 # Run all endpoint tests
-curl http://localhost:8000/health                    # Health check
-curl http://localhost:8000/tasks                     # List tasks
-curl -X POST http://localhost:8000/reset \
-  -d '{"task_id":"task_1"}'                          # Start episode
-curl -X POST http://localhost:8000/step \
-  -d '{"episode_id":"...", "action":{...}}'          # Submit action
+curl http://localhost:8000/health
+curl http://localhost:8000/tasks
+curl -X POST http://localhost:8000/reset -d '{"task_id":"task_1"}'
+curl -X POST http://localhost:8000/step -d '{"episode_id":"...", "action":{...}}'
 
 # Run baseline (OpenAI or Gemini)
 OPENAI_API_KEY="sk-..." python -m bug_triage_env.baseline --all-tasks
@@ -507,26 +488,25 @@ OPENAI_API_KEY="sk-..." python -m bug_triage_env.baseline --all-tasks
 
 ## References
 
-- [OpenEnv Framework](https://github.com/OpenEnv-AI/openenv) — RL environment standard
-- [Meta × PyTorch Hackathon](https://pytorch.org/) — Competition details
-- [FastAPI Documentation](https://fastapi.tiangolo.com) — Web framework
-- [Pydantic v2](https://docs.pydantic.dev/latest/) — Data validation
-- [OpenAI API](https://platform.openai.com/docs) — Primary baseline LLM
-- [Google Gemini API](https://ai.google.dev/gemini-api/docs) — Fallback baseline LLM
-- [GRPO Paper](https://arxiv.org/abs/2402.03300) — Training algorithm
-- [Hugging Face Spaces](https://huggingface.co/spaces) — Deployment platform
+- OpenEnv Framework: https://github.com/OpenEnv-AI/openenv
+- FastAPI Documentation: https://fastapi.tiangolo.com
+- Pydantic v2: https://docs.pydantic.dev/latest/
+- OpenAI API: https://platform.openai.com/docs
+- Google Gemini API: https://ai.google.dev/gemini-api/docs
+- GRPO Paper: https://arxiv.org/abs/2402.03300
+- Hugging Face Spaces: https://huggingface.co/spaces
 
 ---
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the MIT License.
 
 ---
 
 <div align="center">
 
-Built for the **Meta × PyTorch Hackathon**
+Built for the Meta x PyTorch Hackathon
 
 [Back to Top](#bug-triage-openenv)
 

@@ -1,8 +1,9 @@
-.venv/
-__pycache__/
+.venv
+__pycache__
 *.pyc
-.git/
-docs/
-*.md
-.dockerignore
+.git
+docs
+deploy.sh
+PROJECT.md
+TASKS.md
 .gitignore
