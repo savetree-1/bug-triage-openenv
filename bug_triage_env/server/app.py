@@ -52,6 +52,18 @@ env = BugTriageEnvironment()
 # -- Standard OpenEnv endpoints ------------------------------------------------
 
 
+@app.get("/")
+def root() -> Dict[str, Any]:
+    """Root endpoint showing environment info."""
+    return {
+        "name": "Bug Triage OpenEnv",
+        "version": "0.1.0",
+        "status": "running",
+        "endpoints": ["/health", "/reset", "/step", "/state", "/tasks", "/grader", "/baseline", "/docs"],
+        "tasks": ["task_1 (classify)", "task_2 (prioritize)", "task_3 (full triage)"],
+    }
+
+
 @app.get("/health")
 def health() -> Dict[str, str]:
     """Liveness check. Returns 200 with status=healthy."""

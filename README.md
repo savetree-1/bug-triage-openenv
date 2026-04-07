@@ -1,3 +1,14 @@
+---
+title: Bug Triage OpenEnv
+emoji: 🐛
+colorFrom: red
+colorTo: yellow
+sdk: docker
+app_port: 8000
+tags:
+  - openenv
+---
+
 <div align="center">
 
 # Bug Triage OpenEnv
