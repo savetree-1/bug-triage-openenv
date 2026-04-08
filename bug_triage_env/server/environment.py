@@ -83,7 +83,7 @@ class BugTriageEnvironment(_OpenEnvBase):
 
         return BugTriageObservation(
             done=False,
-            reward=0.0,
+            reward=0.01,
             task_id=task_id,
             bug_report=bug_report,
             available_developers=list(DEVELOPERS),
@@ -125,7 +125,7 @@ class BugTriageEnvironment(_OpenEnvBase):
             action.confidence, grader_score
         )
         reward += calibration_bonus
-        reward = max(-0.65, min(1.1, reward))
+        reward = max(0.01, min(0.99, reward))
 
         # Build feedback string
         feedback = self._build_feedback(
