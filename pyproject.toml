@@ -8,6 +8,7 @@ version = "0.1.0"
 description = "Production Bug Triage OpenEnv Environment"
 requires-python = ">=3.10"
 dependencies = [
+    "openenv-core>=0.2.0",
     "fastapi>=0.110.0",
     "uvicorn[standard]>=0.29.0",
     "pydantic>=2.0.0",
@@ -17,5 +18,8 @@ dependencies = [
     "google-genai>=1.0.0",
 ]
 
+[project.scripts]
+server = "server.app:start"
+
 [tool.setuptools.packages.find]
-include = ["bug_triage_env*"]
+include = ["bug_triage_env*", "server*"]
