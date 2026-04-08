@@ -14,10 +14,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy all required files
 COPY bug_triage_env/ ./bug_triage_env/
+COPY server/ ./server/
 COPY openenv.yaml .
 COPY inference.py .
 COPY README.md .
 COPY pyproject.toml .
+COPY uv.lock .
 
 # Expose OpenEnv standard port
 EXPOSE 8000
