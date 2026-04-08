@@ -20,7 +20,10 @@ from openai import OpenAI
 # ----- Required Hackathon Variables -----
 API_BASE_URL = os.getenv("API_BASE_URL", "https://api.openai.com/v1")
 MODEL_NAME = os.getenv("MODEL_NAME", "gpt-4o-mini")
-API_KEY = os.getenv("HF_TOKEN") or os.getenv("API_KEY") or os.getenv("OPENAI_API_KEY")
+HF_TOKEN = os.getenv("HF_TOKEN")
+
+# Optional - if you use from_docker_image():
+LOCAL_IMAGE_NAME = os.getenv("LOCAL_IMAGE_NAME")
 
 ENV_URL = os.getenv("BUG_TRIAGE_ENV_URL", "http://localhost:8000")
 BENCHMARK = "bug_triage_openenv"
@@ -131,11 +134,11 @@ def get_model_action(client: OpenAI, user_prompt: str, task_id: str) -> str:
 # ----- Main Entry Point -----
 
 def main() -> None:
-    if not API_KEY:
-        print("ERROR: HF_TOKEN / API_KEY environment variable is not set.", file=sys.stderr)
+    if not HF_TOKEN:
+        print("ERROR: HF_TOKEN environment variable is not set.", file=sys.stderr)
         sys.exit(1)
 
-    client = OpenAI(base_url=API_BASE_URL, api_key=API_KEY)
+    client = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN)
 
     # Verify the environment server is reachable
     try:
