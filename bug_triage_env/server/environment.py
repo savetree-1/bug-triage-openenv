@@ -183,9 +183,9 @@ class BugTriageEnvironment(_OpenEnvBase):
             ep = self._episodes.get(episode_id)
 
         if ep is None:
-            return {"score": 0.0, "breakdown": {}, "error": "episode_not_found"}
+            return {"score": 0.01, "breakdown": {}, "error": "episode_not_found"}
         if not ep["actions"]:
-            return {"score": 0.0, "breakdown": {}, "error": "no_actions"}
+            return {"score": 0.01, "breakdown": {}, "error": "no_actions"}
 
         grader_fn = GRADERS.get(task_id, GRADERS["task_1"])
         score = grader_fn(ep["actions"], ep["ground_truth"])

@@ -194,14 +194,14 @@ def main() -> None:
 
             log_step(step=step, action=action_json_str, reward=reward, done=done, error=None)
 
-            score = grader_score if grader_score is not None else 0.0
+            score = grader_score if grader_score is not None else 0.01
             score = min(max(score, 0.0), 1.0)
             success = score >= 0.5
 
         except Exception as e:
             print(f"[DEBUG] Episode error: {e}", flush=True)
             success = False
-            score = 0.0
+            score = 0.01
 
         finally:
             log_end(success=success, steps=steps_taken, score=score, rewards=rewards)
