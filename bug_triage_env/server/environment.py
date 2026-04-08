@@ -117,15 +117,12 @@ class BugTriageEnvironment(_OpenEnvBase):
         grader_fn = GRADERS.get(ep["task_id"], GRADERS["task_1"])
         grader_score = grader_fn(ep["actions"], ep["ground_truth"])
 
-        # Shaped reward: map [0, 1] to [-0.5, 1.0] for GRPO training
-        reward = (grader_score * 1.5) - 0.5
-
-        # Confidence calibration bonus/penalty
+        # Bound the reward strictly to [0.0, 1.0] to pass Hackathon Phase 2
         calibration_bonus = self._compute_calibration_bonus(
             action.confidence, grader_score
         )
-        reward += calibration_bonus
-        reward = max(-0.65, min(1.1, reward))
+        reward = grader_score + calibration_bonus
+        reward = max(0.0, min(1.0, reward))
 
         # Build feedback string
         feedback = self._build_feedback(

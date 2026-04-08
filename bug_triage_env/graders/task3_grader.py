@@ -85,7 +85,7 @@ def grade(episode_log: List[Dict[str, Any]], ground_truth: Dict[str, Any]) -> fl
         float score in [0.0, 1.0].
     """
     if not episode_log:
-        return 0.01
+        return 0.0
 
     action = episode_log[-1]
 
@@ -111,4 +111,4 @@ def grade(episode_log: List[Dict[str, Any]], ground_truth: Dict[str, Any]) -> fl
         + WEIGHTS["action"] * s_act
     )
 
-    return max(0.01, min(0.99, round(score, 4)))
+    return max(0.0, min(1.0, round(score, 4)))

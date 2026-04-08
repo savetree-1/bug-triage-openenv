@@ -19,13 +19,13 @@ def grade(episode_log: List[Dict[str, Any]], ground_truth: Dict[str, Any]) -> fl
         Score in [0.0, 1.0].
     """
     if not episode_log:
-        return 0.01
+        return 0.0
 
     last_action = episode_log[-1]
     predicted = (last_action.get("bug_type") or "").strip().lower()
     expected = (ground_truth.get("bug_type") or "").strip().lower()
 
     if not predicted:
-        return 0.01
+        return 0.0
 
-    return 0.99 if predicted == expected else 0.01
+    return 1.0 if predicted == expected else 0.01
